@@ -39,7 +39,7 @@ public class GameConfig {
     private int[] cascadeMultipliers;
 
     public enum EvalType {
-        LINES, WAYS, CLUSTER
+        LINES, WAYS, SCATTER_PAY, CLUSTER
     }
 
     @Data
