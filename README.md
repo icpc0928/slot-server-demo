@@ -1,6 +1,6 @@
 # 🎰 Slot Game Server
 
-Spring Boot 老虎機遊戲伺服器 — 展示 Clean Architecture & Design Patterns
+Spring Boot 老虎機遊戲伺服器 
 
 ## Architecture
 

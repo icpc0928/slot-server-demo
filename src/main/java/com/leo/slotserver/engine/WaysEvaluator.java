@@ -8,10 +8,8 @@ import java.util.*;
 
 /**
  * Ways 計算器 — 共用的 Ways 贏分計算邏輯
- * <p>
- * 單一責任原則 (SRP)：只負責 Ways 模式的贏分計算。
+ * 單一責任原則：只負責 Ways 模式的贏分計算。
  * 可以被任何使用 Ways 計算的遊戲引擎共用。
- * </p>
  */
 public class WaysEvaluator {
 
@@ -23,10 +21,8 @@ public class WaysEvaluator {
 
     /**
      * 計算 Ways 中獎
-     * <p>
      * Ways 計算：從左到右，每軸至少出現 1 個該符號（或 Wild），
      * 路數 = 各軸出現次數的乘積
-     * </p>
      */
     public List<WinResult> evaluate(int[][] grid, SpinContext context) {
         List<WinResult> results = new ArrayList<>();
