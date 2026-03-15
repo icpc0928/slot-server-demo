@@ -1,0 +1,10 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: slot-game-server
+
+game:
+  default-balance: 10000.0
+  max-win-cap: 10000  # x total bet
