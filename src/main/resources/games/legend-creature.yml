@@ -1,0 +1,38 @@
+gameId: legend-creature
+gameName: Legendary Creature (神獸)
+reels: 3
+rows: 3
+betMultiplier: 10
+evalType: LINES
+maxWinCap: 5000
+hasCascade: false
+wildSymbolId: 4
+scatterSymbolId: 5
+scatterToTrigger: 3
+freeSpinCount: 5
+
+symbols:
+  - { id: 0, name: "L1", type: REGULAR }
+  - { id: 1, name: "L2", type: REGULAR }
+  - { id: 2, name: "S1", type: REGULAR }
+  - { id: 3, name: "S2", type: REGULAR }
+  - { id: 4, name: "WILD", type: WILD }
+  - { id: 5, name: "SCATTER", type: SCATTER }
+
+# paytable: symbolId -> [0, 1match, 2match, 3match]
+paytable:
+  0: [0, 0, 0, 8]
+  1: [0, 0, 0, 8]
+  2: [0, 0, 0, 15]
+  3: [0, 0, 0, 25]
+  4: [0, 0, 0, 30]
+
+baseReelStrips:
+  0: [0,1,2,3,0,1,2,3,0,1,0,1,0,1,2,3,4,0,1,2,3,0,1,5,0,1,2,3,0,1]
+  1: [0,1,2,3,0,1,2,3,0,1,0,1,0,1,2,3,4,0,1,2,3,0,1,5,0,1,2,3,0,1]
+  2: [0,1,2,3,0,1,2,3,0,1,0,1,0,1,2,3,4,0,1,2,3,0,1,5,0,1,2,3,0,1]
+
+freeReelStrips:
+  0: [0,1,2,3,0,1,2,3,4,0,1,2,3,0,1,2,3,4,5,0,1,2,3,0,1,2,3,4,0,1]
+  1: [0,1,2,3,0,1,2,3,4,0,1,2,3,0,1,2,3,4,5,0,1,2,3,0,1,2,3,4,0,1]
+  2: [0,1,2,3,0,1,2,3,4,0,1,2,3,0,1,2,3,4,5,0,1,2,3,0,1,2,3,4,0,1]
