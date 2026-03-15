@@ -34,10 +34,8 @@ class GameServiceTest {
     @Test
     @DisplayName("餘額不足應拋出 InsufficientBalanceException")
     void insufficientBalance_shouldThrow() {
-        // 先耗盡餘額（預設 10000）
-        // 直接測試超大投注
-        assertThrows(GameNotFoundException.class, () ->
-                gameService.spin("gates-of-olympus-1000", 999999.0, "player1"));
+        assertThrows(InsufficientBalanceException.class, () ->
+                gameService.spin("any-game", 999999.0, "player1"));
     }
 
     @Test
