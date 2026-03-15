@@ -1,6 +1,7 @@
 package com.leo.slotserver.engine.fortunegods;
 
 import com.leo.slotserver.engine.AbstractSlotEngine;
+import com.leo.slotserver.engine.SlotGame;
 import com.leo.slotserver.engine.WaysEvaluator;
 import com.leo.slotserver.model.*;
 
@@ -14,6 +15,7 @@ import java.util.List;
  *       只覆寫有差異的部分（Free Spin 次數計算）
  * </p>
  */
+@SlotGame("fortune-gods")
 public class FortuneGodsEngine extends AbstractSlotEngine {
 
     private final WaysEvaluator waysEvaluator;

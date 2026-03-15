@@ -2,6 +2,7 @@ package com.leo.slotserver.engine.gatesofolympus;
 
 import com.leo.slotserver.engine.AbstractSlotEngine;
 import com.leo.slotserver.engine.ScatterPayEvaluator;
+import com.leo.slotserver.engine.SlotGame;
 import com.leo.slotserver.model.*;
 
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.List;
  * 體現不同計算策略可以自由組合到不同引擎中。
  * </p>
  */
+@SlotGame("gates-of-olympus-1000")
 public class GatesOfOlympusEngine extends AbstractSlotEngine {
 
     private final ScatterPayEvaluator scatterPayEvaluator;

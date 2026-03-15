@@ -2,6 +2,7 @@ package com.leo.slotserver.engine.superace;
 
 import com.leo.slotserver.engine.AbstractSlotEngine;
 import com.leo.slotserver.engine.LinesEvaluator;
+import com.leo.slotserver.engine.SlotGame;
 import com.leo.slotserver.model.*;
 
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.List;
  * 使用 LinesEvaluator 而非 WaysEvaluator，體現 Strategy Pattern
  * </p>
  */
+@SlotGame("super-ace")
 public class SuperAceEngine extends AbstractSlotEngine {
 
     private final LinesEvaluator linesEvaluator;
