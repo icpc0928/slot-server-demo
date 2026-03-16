@@ -49,7 +49,6 @@ public class GameController {
      */
     @PostMapping("/spin")
     public ResponseEntity<SpinResponseDTO> spin(@Valid @RequestBody SpinRequestDTO request) {
-        // 簡化版：用固定 playerId，實際應從 JWT 取得
         String playerId = "default-player";
         SpinResponseDTO response = gameService.spin(
                 request.getGameId(),

@@ -36,6 +36,7 @@ public class GameRegistryConfig {
 
         for (Resource resource : resources) {
             try {
+                //讀取各款遊戲的config並做註冊
                 GameConfig config = yamlMapper.readValue(resource.getInputStream(), GameConfig.class);
                 engineFactory.register(config);
                 log.info("✅ Registered game: {} ({})", config.getGameId(), config.getGameName());
