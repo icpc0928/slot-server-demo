@@ -1,0 +1,162 @@
+### ============================
+### Slot Game Server API
+### ============================
+
+### 取得所有遊戲列表
+GET http://localhost:8080/api/games
+Accept: application/json
+
+### 取得 Fortune Gods 遊戲資訊
+GET http://localhost:8080/api/games/fortune-gods
+Accept: application/json
+
+### 取得 Gates of Olympus 1000 遊戲資訊
+GET http://localhost:8080/api/games/gates-of-olympus-1000
+Accept: application/json
+
+### 取得 Super Ace 遊戲資訊
+GET http://localhost:8080/api/games/super-ace
+Accept: application/json
+
+### 取得 Legendary Creature 遊戲資訊
+GET http://localhost:8080/api/games/legend-creature
+Accept: application/json
+
+### 取得不存在的遊戲（應回 404）
+GET http://localhost:8080/api/games/non-existent-game
+Accept: application/json
+
+### ============================
+### Spin — Fortune Gods (6x5 Ways + Cascade)
+### ============================
+
+### Fortune Gods — 投注 20
+POST http://localhost:8080/api/games/spin
+Content-Type: application/json
+
+{
+  "gameId": "fortune-gods",
+  "betAmount": 20.0
+}
+
+### Fortune Gods — 投注 100
+POST http://localhost:8080/api/games/spin
+Content-Type: application/json
+
+{
+  "gameId": "fortune-gods",
+  "betAmount": 100.0
+}
+
+### ============================
+### Spin — Gates of Olympus 1000 (6x5 Scatter Pay + Tumble)
+### ============================
+
+### Gates of Olympus — 投注 20
+POST http://localhost:8080/api/games/spin
+Content-Type: application/json
+
+{
+  "gameId": "gates-of-olympus-1000",
+  "betAmount": 20.0
+}
+
+### Gates of Olympus — 投注 50
+POST http://localhost:8080/api/games/spin
+Content-Type: application/json
+
+{
+  "gameId": "gates-of-olympus-1000",
+  "betAmount": 50.0
+}
+
+### ============================
+### Spin — Super Ace (5x3 Lines)
+### ============================
+
+### Super Ace — 投注 20
+POST http://localhost:8080/api/games/spin
+Content-Type: application/json
+
+{
+  "gameId": "super-ace",
+  "betAmount": 20.0
+}
+
+### Super Ace — 投注 200
+POST http://localhost:8080/api/games/spin
+Content-Type: application/json
+
+{
+  "gameId": "super-ace",
+  "betAmount": 200.0
+}
+
+### ============================
+### Spin — Legendary Creature (3x3 Single Line)
+### ============================
+
+### Legend Creature — 投注 10
+POST http://localhost:8080/api/games/spin
+Content-Type: application/json
+
+{
+  "gameId": "legend-creature",
+  "betAmount": 10.0
+}
+
+### ============================
+### Balance
+### ============================
+
+### 查詢玩家餘額
+GET http://localhost:8080/api/games/balance
+Accept: application/json
+
+### ============================
+### Error Cases
+### ============================
+
+### 不存在的遊戲（應回 404）
+POST http://localhost:8080/api/games/spin
+Content-Type: application/json
+
+{
+  "gameId": "non-existent-game",
+  "betAmount": 20.0
+}
+
+### 投注金額為 0（應回 400）
+POST http://localhost:8080/api/games/spin
+Content-Type: application/json
+
+{
+  "gameId": "fortune-gods",
+  "betAmount": 0
+}
+
+### 投注金額為負數（應回 400）
+POST http://localhost:8080/api/games/spin
+Content-Type: application/json
+
+{
+  "gameId": "fortune-gods",
+  "betAmount": -10.0
+}
+
+### 餘額不足（投注超大金額，應回 400）
+POST http://localhost:8080/api/games/spin
+Content-Type: application/json
+
+{
+  "gameId": "fortune-gods",
+  "betAmount": 999999.0
+}
+
+### 缺少 gameId（應回 400）
+POST http://localhost:8080/api/games/spin
+Content-Type: application/json
+
+{
+  "betAmount": 20.0
+}
