@@ -53,14 +53,14 @@ public class SlotEngineFactory {
                     @SuppressWarnings("unchecked")
                     Class<? extends SlotEngine> engineClass = (Class<? extends SlotEngine>) clazz;
                     engineClassMap.put(gameId, engineClass);
-                    log.info("🎰 Scanned engine: {} -> {}", gameId, clazz.getSimpleName());
+                    log.info("Scanned engine: {} -> {}", gameId, clazz.getSimpleName());
                 }
             } catch (ClassNotFoundException e) {
-                log.error("❌ Failed to load engine class: {}", bd.getBeanClassName(), e);
+                log.error("Failed to load engine class: {}", bd.getBeanClassName(), e);
             }
         }
 
-        log.info("📊 Total engines scanned: {}", engineClassMap.size());
+        log.info("Total engines scanned: {}", engineClassMap.size());
     }
 
     /**
