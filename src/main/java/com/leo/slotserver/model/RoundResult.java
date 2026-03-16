@@ -10,9 +10,9 @@ import java.util.List;
  * 結構：
  *   RoundResult
  *   ├── BaseResult (主遊戲)
- *   │   └── List&lt;CascadeRound&gt;  (初始停輪 + N 次連消)
- *   ├── List&lt;FreeSpinResult&gt;    (每一轉免費遊戲)
- *   │   └── List&lt;CascadeRound&gt;  (初始停輪 + N 次連消)
+ *   │   └── List<CascadeRound>  (初始停輪 + N 次連消)
+ *   ├── List<FreeSpinResult>    (每一轉免費遊戲)
+ *   │   └── List<CascadeRound>  (初始停輪 + N 次連消)
  *   └── 總計資訊
  * </p>
  */

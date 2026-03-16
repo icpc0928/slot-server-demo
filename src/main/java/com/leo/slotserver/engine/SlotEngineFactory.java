@@ -62,7 +62,7 @@ public class SlotEngineFactory {
             }
         }
         
-        log.info("📊 Total engines scanned: {}", engineClassMap.size());
+        log.info("Total engines scanned: {}", engineClassMap.size());
     }
 
     /**

@@ -17,8 +17,8 @@ import java.lang.annotation.*;
  * 新增遊戲不需修改工廠程式碼 — 符合開放封閉原則 (OCP)
  * </p>
  */
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)   //type: 只能標在Class, interface (including annotation interface), enum, or record declaration
+@Retention(RetentionPolicy.RUNTIME) //RUNTIME = 程式執行時還在，所以反射才能讀到它
 @Documented
 @Component
 public @interface SlotGame {
