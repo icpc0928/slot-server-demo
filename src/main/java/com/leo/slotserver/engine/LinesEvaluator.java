@@ -13,7 +13,7 @@ import java.util.*;
  * 遊戲引擎只依賴自己需要的計算器。
  * </p>
  */
-public class LinesEvaluator {
+public class LinesEvaluator implements WinEvaluator {
 
     private final GameConfig config;
     private final int[][] paylines;

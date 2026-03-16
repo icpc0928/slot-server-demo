@@ -14,7 +14,7 @@ import java.util.*;
  * 適用於 Gates of Olympus、Sweet Bonanza 等遊戲。
  * </p>
  */
-public class ScatterPayEvaluator {
+public class ScatterPayEvaluator implements WinEvaluator {
 
     private final GameConfig config;
 

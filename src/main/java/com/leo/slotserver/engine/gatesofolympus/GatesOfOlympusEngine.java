@@ -1,6 +1,7 @@
 package com.leo.slotserver.engine.gatesofolympus;
 
 import com.leo.slotserver.engine.AbstractSlotEngine;
+import com.leo.slotserver.engine.WinEvaluator;
 import com.leo.slotserver.engine.ScatterPayEvaluator;
 import com.leo.slotserver.engine.SlotGame;
 import com.leo.slotserver.model.*;
@@ -23,16 +24,16 @@ import java.util.List;
 @SlotGame("gates-of-olympus-1000")
 public class GatesOfOlympusEngine extends AbstractSlotEngine {
 
-    private final ScatterPayEvaluator scatterPayEvaluator;
+    private final WinEvaluator winEvaluator;
 
     public GatesOfOlympusEngine(GameConfig config) {
         super(config);
-        this.scatterPayEvaluator = new ScatterPayEvaluator(config);
+        this.winEvaluator = new ScatterPayEvaluator(config);
     }
 
     @Override
     protected List<WinResult> evaluateWins(int[][] grid, SpinContext context) {
-        return scatterPayEvaluator.evaluate(grid, context);
+        return winEvaluator.evaluate(grid, context);
     }
 
     /**

@@ -1,6 +1,7 @@
 package com.leo.slotserver.engine.legendcreature;
 
 import com.leo.slotserver.engine.AbstractSlotEngine;
+import com.leo.slotserver.engine.WinEvaluator;
 import com.leo.slotserver.engine.LinesEvaluator;
 import com.leo.slotserver.engine.SlotGame;
 import com.leo.slotserver.model.*;
@@ -18,7 +19,7 @@ import java.util.List;
 @SlotGame("legend-creature")
 public class LegendCreatureEngine extends AbstractSlotEngine {
 
-    private final LinesEvaluator linesEvaluator;
+    private final WinEvaluator winEvaluator;
 
     // 3x3 單線：只看中間一行
     private static final int[][] PAYLINES = {
@@ -27,12 +28,12 @@ public class LegendCreatureEngine extends AbstractSlotEngine {
 
     public LegendCreatureEngine(GameConfig config) {
         super(config);
-        this.linesEvaluator = new LinesEvaluator(config, PAYLINES);
+        this.winEvaluator = new LinesEvaluator(config, PAYLINES);
     }
 
     @Override
     protected List<WinResult> evaluateWins(int[][] grid, SpinContext context) {
-        return linesEvaluator.evaluate(grid, context);
+        return winEvaluator.evaluate(grid, context);
     }
 
     /**

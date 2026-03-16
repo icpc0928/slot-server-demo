@@ -1,6 +1,7 @@
 package com.leo.slotserver.engine.superace;
 
 import com.leo.slotserver.engine.AbstractSlotEngine;
+import com.leo.slotserver.engine.WinEvaluator;
 import com.leo.slotserver.engine.LinesEvaluator;
 import com.leo.slotserver.engine.SlotGame;
 import com.leo.slotserver.model.*;
@@ -17,7 +18,7 @@ import java.util.List;
 @SlotGame("super-ace")
 public class SuperAceEngine extends AbstractSlotEngine {
 
-    private final LinesEvaluator linesEvaluator;
+    private final WinEvaluator winEvaluator;
 
     // Super Ace 50 線定義（簡化版 — 前 20 線）
     private static final int[][] PAYLINES = {
@@ -45,12 +46,12 @@ public class SuperAceEngine extends AbstractSlotEngine {
 
     public SuperAceEngine(GameConfig config) {
         super(config);
-        this.linesEvaluator = new LinesEvaluator(config, PAYLINES);
+        this.winEvaluator = new LinesEvaluator(config, PAYLINES);
     }
 
     @Override
     protected List<WinResult> evaluateWins(int[][] grid, SpinContext context) {
-        return linesEvaluator.evaluate(grid, context);
+        return winEvaluator.evaluate(grid, context);
     }
 
     /**

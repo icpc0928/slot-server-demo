@@ -11,7 +11,7 @@ import java.util.*;
  * 單一責任原則：只負責 Ways 模式的贏分計算。
  * 可以被任何使用 Ways 計算的遊戲引擎共用。
  */
-public class WaysEvaluator {
+public class WaysEvaluator implements WinEvaluator {
 
     private final GameConfig config;
 

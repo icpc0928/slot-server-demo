@@ -1,6 +1,7 @@
 package com.leo.slotserver.engine.fortunegods;
 
 import com.leo.slotserver.engine.AbstractSlotEngine;
+import com.leo.slotserver.engine.WinEvaluator;
 import com.leo.slotserver.engine.SlotGame;
 import com.leo.slotserver.engine.WaysEvaluator;
 import com.leo.slotserver.model.*;
@@ -22,7 +23,7 @@ import java.util.Map;
 @SlotGame("fortune-gods")
 public class FortuneGodsEngine extends AbstractSlotEngine {
 
-    private final WaysEvaluator waysEvaluator;
+    private final WinEvaluator winEvaluator;
 
     // 多格符號出現的機率（百分比），只在第 2~5 軸出現
     private static final int MEGA_SYMBOL_CHANCE = 15;
@@ -31,7 +32,7 @@ public class FortuneGodsEngine extends AbstractSlotEngine {
 
     public FortuneGodsEngine(GameConfig config) {
         super(config);
-        this.waysEvaluator = new WaysEvaluator(config);
+        this.winEvaluator = new WaysEvaluator(config);
     }
 
     /**
@@ -107,7 +108,7 @@ public class FortuneGodsEngine extends AbstractSlotEngine {
 
     @Override
     protected List<WinResult> evaluateWins(int[][] grid, SpinContext context) {
-        return waysEvaluator.evaluate(grid, context);
+        return winEvaluator.evaluate(grid, context);
     }
 
     /**
