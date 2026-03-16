@@ -117,8 +117,8 @@ public class FortuneGodsEngine extends AbstractSlotEngine {
      * 5+ 個 Scatter = 20 次
      */
     @Override
-    protected int determineFreeSpinCount(SpinResult triggerSpin) {
-        return switch (triggerSpin.getScatterCount()) {
+    protected int determineFreeSpinCount(int scatterCount) {
+        return switch (scatterCount) {
             case 3 -> 10;
             case 4 -> 15;
             default -> 20;

@@ -40,8 +40,8 @@ public class GatesOfOlympusEngine extends AbstractSlotEngine {
      * 4 個 = 15 次, 5 個 = 20 次, 6 個 = 25 次
      */
     @Override
-    protected int determineFreeSpinCount(SpinResult triggerSpin) {
-        return switch (triggerSpin.getScatterCount()) {
+    protected int determineFreeSpinCount(int scatterCount) {
+        return switch (scatterCount) {
             case 4 -> 15;
             case 5 -> 20;
             case 6 -> 25;

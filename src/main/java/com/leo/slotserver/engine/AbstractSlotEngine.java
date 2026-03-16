@@ -50,57 +50,213 @@ public abstract class AbstractSlotEngine implements SlotEngine {
                 .currentMultiplier(1)
                 .build();
 
-        // Step 1: Base Spin
-        SpinResult baseSpin = executeSpin(context);
-        double baseWin = baseSpin.getTotalWin();
+        // Step 1: 主遊戲（初始停輪 + 連消）
+        BaseResult baseResult = executeBaseGame(context);
 
-        // Step 2: Cascade (if applicable)
-        List<SpinResult> cascadeSpins = new ArrayList<>();
-        if (config.isHasCascade() && baseSpin.hasWin()) {
-            cascadeSpins = processCascade(baseSpin, context);
-            baseWin += cascadeSpins.stream().mapToDouble(SpinResult::getTotalWin).sum();
-        }
-
-        // Step 3: Free Spin (if triggered)
-        List<SpinResult> freeSpins = new ArrayList<>();
+        // Step 2: 免費遊戲（如果觸發）
+        List<FreeSpinResult> freeSpinResults = new ArrayList<>();
         double freeSpinWin = 0;
         int totalFreeSpinCount = 0;
-        boolean freeSpinTriggered = checkFreeSpinTrigger(baseSpin);
 
-        if (freeSpinTriggered) {
-            totalFreeSpinCount = determineFreeSpinCount(baseSpin);
+        if (baseResult.isFreeSpinTriggered()) {
+            totalFreeSpinCount = baseResult.getFreeSpinCount();
             SpinContext freeContext = SpinContext.builder()
                     .gameId(config.getGameId())
                     .betAmount(betAmount)
                     .lineBet(lineBet)
                     .isFreeSpinMode(true)
                     .cascadeLevel(0)
-                    .freeSpinsRemaining(totalFreeSpinCount)
                     .currentMultiplier(1)
                     .build();
 
-            freeSpins = processFreeSpins(freeContext);
-            freeSpinWin = freeSpins.stream().mapToDouble(SpinResult::getTotalWin).sum();
+            freeSpinResults = processFreeSpins(freeContext, totalFreeSpinCount);
+            freeSpinWin = freeSpinResults.stream().mapToDouble(FreeSpinResult::getTotalWin).sum();
+            totalFreeSpinCount = freeSpinResults.size();
         }
 
-        // Step 4: Calculate total
-        double totalWin = baseWin + freeSpinWin;
+        // Step 3: 加總
+        double totalWin = baseResult.getTotalWin() + freeSpinWin;
         double maxWin = betAmount * config.getMaxWinCap();
         totalWin = Math.min(totalWin, maxWin);  // Win cap
 
         return RoundResult.builder()
                 .gameId(config.getGameId())
                 .betAmount(betAmount)
-                .baseSpin(baseSpin)
-                .cascadeSpins(cascadeSpins)
-                .freeSpins(freeSpins)
-                .baseWin(baseWin)
+                .baseResult(baseResult)
+                .freeSpinResults(freeSpinResults)
+                .baseWin(baseResult.getTotalWin())
                 .freeSpinWin(freeSpinWin)
                 .totalWin(totalWin)
-                .freeSpinTriggered(freeSpinTriggered)
+                .freeSpinTriggered(baseResult.isFreeSpinTriggered())
                 .totalFreeSpins(totalFreeSpinCount)
                 .winMultiplier(betAmount > 0 ? totalWin / betAmount : 0)
                 .build();
+    }
+
+    // ==========================================
+    // 主遊戲流程
+    // ==========================================
+
+    /**
+     * 執行主遊戲：初始停輪 + 連消循環
+     */
+    protected BaseResult executeBaseGame(SpinContext context) {
+        List<CascadeRound> rounds = new ArrayList<>();
+        int cascadeLevel = 0;
+        double totalWin = 0;
+        int totalScatterCount = 0;
+
+        // 初始停輪
+        int[][] grid = generateGrid(context);
+        CascadeRound firstRound = buildCascadeRound(grid, context, cascadeLevel);
+        rounds.add(firstRound);
+        totalWin += firstRound.getTotalWin();
+        totalScatterCount += firstRound.getScatterCount();
+
+        // 連消循環
+        if (config.isHasCascade()) {
+            int[][] currentGrid = grid;
+            CascadeRound currentRound = firstRound;
+
+            while (currentRound.hasWin()) {
+                cascadeLevel++;
+                currentGrid = cascadeGrid(currentRound);
+                SpinContext cascadeContext = SpinContext.builder()
+                        .gameId(context.getGameId())
+                        .betAmount(context.getBetAmount())
+                        .lineBet(context.getLineBet())
+                        .isFreeSpinMode(context.isFreeSpinMode())
+                        .cascadeLevel(cascadeLevel)
+                        .currentMultiplier(getCascadeMultiplier(cascadeLevel))
+                        .build();
+
+                currentRound = buildCascadeRound(currentGrid, cascadeContext, cascadeLevel);
+                if (currentRound.hasWin()) {
+                    rounds.add(currentRound);
+                    totalWin += currentRound.getTotalWin();
+                    totalScatterCount += currentRound.getScatterCount();
+                }
+            }
+        }
+
+        // 標記最後一消的 hasNextCascade = false
+        if (!rounds.isEmpty()) {
+            rounds.get(rounds.size() - 1).setHasNextCascade(false);
+        }
+
+        boolean triggered = totalScatterCount >= config.getScatterToTrigger();
+        int freeCount = triggered ? determineFreeSpinCount(totalScatterCount) : 0;
+
+        return BaseResult.builder()
+                .rounds(rounds)
+                .totalWin(totalWin)
+                .scatterCount(totalScatterCount)
+                .freeSpinTriggered(triggered)
+                .freeSpinCount(freeCount)
+                .build();
+    }
+
+    /**
+     * 建立單次消除結果
+     */
+    private CascadeRound buildCascadeRound(int[][] grid, SpinContext context, int cascadeLevel) {
+        List<WinResult> wins = evaluateWins(grid, context);
+        int multiplier = context.getCurrentMultiplier();
+        double totalWin = wins.stream().mapToDouble(WinResult::getPayout).sum();
+        int scatterCount = countScatters(grid);
+
+        return CascadeRound.builder()
+                .roundIndex(cascadeLevel)
+                .grid(deepCopyGrid(grid))
+                .wins(wins)
+                .totalWin(totalWin)
+                .multiplier(multiplier)
+                .scatterCount(scatterCount)
+                .hasNextCascade(totalWin > 0 && config.isHasCascade())
+                .build();
+    }
+
+    // ==========================================
+    // 免費遊戲流程
+    // ==========================================
+
+    /**
+     * 處理免費遊戲：每一轉都跑初始停輪 + 連消
+     */
+    protected List<FreeSpinResult> processFreeSpins(SpinContext context, int totalSpins) {
+        List<FreeSpinResult> results = new ArrayList<>();
+        int remaining = totalSpins;
+        int spinIndex = 0;
+
+        while (remaining > 0) {
+            SpinContext freeContext = SpinContext.builder()
+                    .gameId(context.getGameId())
+                    .betAmount(context.getBetAmount())
+                    .lineBet(context.getLineBet())
+                    .isFreeSpinMode(true)
+                    .cascadeLevel(0)
+                    .currentMultiplier(1)
+                    .build();
+
+            // 每一轉免費遊戲：停輪 + 連消（結構同主遊戲）
+            List<CascadeRound> rounds = new ArrayList<>();
+            int cascadeLevel = 0;
+            double spinTotalWin = 0;
+            int spinScatterCount = 0;
+
+            int[][] grid = generateGrid(freeContext);
+            CascadeRound firstRound = buildCascadeRound(grid, freeContext, cascadeLevel);
+            rounds.add(firstRound);
+            spinTotalWin += firstRound.getTotalWin();
+            spinScatterCount += firstRound.getScatterCount();
+
+            // 連消
+            if (config.isHasCascade()) {
+                CascadeRound currentRound = firstRound;
+                while (currentRound.hasWin()) {
+                    cascadeLevel++;
+                    int[][] newGrid = cascadeGrid(currentRound);
+                    SpinContext cascadeContext = SpinContext.builder()
+                            .gameId(context.getGameId())
+                            .betAmount(context.getBetAmount())
+                            .lineBet(context.getLineBet())
+                            .isFreeSpinMode(true)
+                            .cascadeLevel(cascadeLevel)
+                            .currentMultiplier(getCascadeMultiplier(cascadeLevel))
+                            .build();
+
+                    currentRound = buildCascadeRound(newGrid, cascadeContext, cascadeLevel);
+                    if (currentRound.hasWin()) {
+                        rounds.add(currentRound);
+                        spinTotalWin += currentRound.getTotalWin();
+                        spinScatterCount += currentRound.getScatterCount();
+                    }
+                }
+            }
+
+            if (!rounds.isEmpty()) {
+                rounds.get(rounds.size() - 1).setHasNextCascade(false);
+            }
+
+            // Retrigger 判定
+            boolean retrigger = spinScatterCount >= config.getScatterToTrigger();
+            if (retrigger) {
+                remaining += determineFreeSpinCount(spinScatterCount);
+            }
+
+            results.add(FreeSpinResult.builder()
+                    .spinIndex(spinIndex)
+                    .rounds(rounds)
+                    .totalWin(spinTotalWin)
+                    .currentMultiplier(1)
+                    .scatterCount(spinScatterCount)
+                    .retrigger(retrigger)
+                    .build());
+
+            spinIndex++;
+            remaining--;
+        }
+        return results;
     }
 
     // ==========================================
@@ -108,26 +264,7 @@ public abstract class AbstractSlotEngine implements SlotEngine {
     // ==========================================
 
     /**
-     * 執行單次旋轉 — 子類可覆寫以自定義盤面生成邏輯
-     */
-    protected SpinResult executeSpin(SpinContext context) {
-        int[][] grid = generateGrid(context);
-        List<WinResult> wins = evaluateWins(grid, context);
-        double totalWin = wins.stream().mapToDouble(WinResult::getPayout).sum();
-        int scatterCount = countScatters(grid);
-
-        return SpinResult.builder()
-                .grid(grid)
-                .wins(wins)
-                .totalWin(totalWin)
-                .scatterCount(scatterCount)
-                .featureTriggered(scatterCount >= config.getScatterToTrigger())
-                .cascadeLevel(context.getCascadeLevel())
-                .build();
-    }
-
-    /**
-     * 生成盤面 — 根據輪帶權重隨機產生
+     * 生成盤面 — 根據輪帶權重隨機產生。子類可覆寫以自定義盤面生成邏輯。
      */
     protected int[][] generateGrid(SpinContext context) {
         Map<Integer, int[]> strips = context.isFreeSpinMode()
@@ -146,7 +283,7 @@ public abstract class AbstractSlotEngine implements SlotEngine {
     }
 
     /**
-     * 計算贏分 — 子類必須實作（Lines vs Ways vs Cluster 不同）
+     * 計算贏分 — 子類必須實作（Lines vs Ways vs ScatterPay 不同）
      */
     protected abstract List<WinResult> evaluateWins(int[][] grid, SpinContext context);
 
@@ -165,56 +302,10 @@ public abstract class AbstractSlotEngine implements SlotEngine {
     }
 
     /**
-     * 檢查是否觸發免費遊戲
+     * 決定免費遊戲次數 — 子類可覆寫
      */
-    protected boolean checkFreeSpinTrigger(SpinResult spinResult) {
-        return spinResult.getScatterCount() >= config.getScatterToTrigger();
-    }
-
-    /**
-     * 決定免費遊戲次數 — 子類可覆寫（如根據 Scatter 數量給不同次數）
-     */
-    protected int determineFreeSpinCount(SpinResult triggerSpin) {
+    protected int determineFreeSpinCount(int scatterCount) {
         return config.getFreeSpinCount();
-    }
-
-    /**
-     * 處理連消 — 子類可覆寫以自定義連消邏輯
-     */
-    protected List<SpinResult> processCascade(SpinResult initialSpin, SpinContext context) {
-        List<SpinResult> cascadeResults = new ArrayList<>();
-        SpinResult currentSpin = initialSpin;
-        int cascadeLevel = 1;
-
-        while (currentSpin.hasWin()) {
-            int[][] newGrid = cascadeGrid(currentSpin);
-            SpinContext cascadeContext = SpinContext.builder()
-                    .gameId(context.getGameId())
-                    .betAmount(context.getBetAmount())
-                    .lineBet(context.getLineBet())
-                    .isFreeSpinMode(context.isFreeSpinMode())
-                    .cascadeLevel(cascadeLevel)
-                    .currentMultiplier(getCascadeMultiplier(cascadeLevel))
-                    .build();
-
-            List<WinResult> wins = evaluateWins(newGrid, cascadeContext);
-            double multiplier = getCascadeMultiplier(cascadeLevel);
-            double totalWin = wins.stream().mapToDouble(WinResult::getPayout).sum() * multiplier;
-
-            currentSpin = SpinResult.builder()
-                    .grid(newGrid)
-                    .wins(wins)
-                    .totalWin(totalWin)
-                    .scatterCount(countScatters(newGrid))
-                    .cascadeLevel(cascadeLevel)
-                    .build();
-
-            if (currentSpin.hasWin()) {
-                cascadeResults.add(currentSpin);
-            }
-            cascadeLevel++;
-        }
-        return cascadeResults;
     }
 
     /**
@@ -230,12 +321,11 @@ public abstract class AbstractSlotEngine implements SlotEngine {
     /**
      * 連消後生成新盤面 — 移除中獎符號，掉落新符號
      */
-    protected int[][] cascadeGrid(SpinResult spinResult) {
-        int[][] grid = deepCopyGrid(spinResult.getGrid());
+    protected int[][] cascadeGrid(CascadeRound round) {
+        int[][] grid = deepCopyGrid(round.getGrid());
         Set<String> winPositions = new HashSet<>();
 
-        // 收集所有中獎位置
-        for (WinResult win : spinResult.getWins()) {
+        for (WinResult win : round.getWins()) {
             if (win.getPositions() != null) {
                 for (int[] pos : win.getPositions()) {
                     winPositions.add(pos[0] + "," + pos[1]);
@@ -243,7 +333,6 @@ public abstract class AbstractSlotEngine implements SlotEngine {
             }
         }
 
-        // 移除中獎符號並掉落
         for (int reel = 0; reel < config.getReels(); reel++) {
             List<Integer> remaining = new ArrayList<>();
             for (int row = 0; row < config.getRows(); row++) {
@@ -251,7 +340,6 @@ public abstract class AbstractSlotEngine implements SlotEngine {
                     remaining.add(grid[reel][row]);
                 }
             }
-            // 從輪帶補充新符號
             int[] strip = config.getBaseReelStrips().get(reel);
             while (remaining.size() < config.getRows()) {
                 remaining.add(0, strip[random.nextInt(strip.length)]);
@@ -261,41 +349,6 @@ public abstract class AbstractSlotEngine implements SlotEngine {
             }
         }
         return grid;
-    }
-
-    /**
-     * 處理免費遊戲
-     */
-    protected List<SpinResult> processFreeSpins(SpinContext context) {
-        List<SpinResult> results = new ArrayList<>();
-        int remaining = context.getFreeSpinsRemaining();
-
-        while (remaining > 0) {
-            SpinContext freeContext = SpinContext.builder()
-                    .gameId(context.getGameId())
-                    .betAmount(context.getBetAmount())
-                    .lineBet(context.getLineBet())
-                    .isFreeSpinMode(true)
-                    .cascadeLevel(0)
-                    .currentMultiplier(1)
-                    .build();
-
-            SpinResult spin = executeSpin(freeContext);
-            results.add(spin);
-
-            // Cascade in free spin
-            if (config.isHasCascade() && spin.hasWin()) {
-                List<SpinResult> cascades = processCascade(spin, freeContext);
-                results.addAll(cascades);
-            }
-
-            // Retrigger check
-            if (checkFreeSpinTrigger(spin)) {
-                remaining += determineFreeSpinCount(spin);
-            }
-            remaining--;
-        }
-        return results;
     }
 
     // ==========================================
@@ -310,16 +363,10 @@ public abstract class AbstractSlotEngine implements SlotEngine {
         return copy;
     }
 
-    /**
-     * 檢查符號是否為 Wild（可替代其他符號）
-     */
     protected boolean isWild(int symbolId) {
         return symbolId == config.getWildSymbolId();
     }
 
-    /**
-     * 檢查符號是否為 Scatter
-     */
     protected boolean isScatter(int symbolId) {
         return symbolId == config.getScatterSymbolId();
     }

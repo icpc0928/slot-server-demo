@@ -57,7 +57,7 @@ public class SuperAceEngine extends AbstractSlotEngine {
      * Super Ace 固定 10 次 Free Spin
      */
     @Override
-    protected int determineFreeSpinCount(SpinResult triggerSpin) {
+    protected int determineFreeSpinCount(int scatterCount) {
         return 10;
     }
 }

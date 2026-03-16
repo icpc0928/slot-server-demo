@@ -39,7 +39,7 @@ public class LegendCreatureEngine extends AbstractSlotEngine {
      * Legendary Creature 固定 5 次 Free Spin
      */
     @Override
-    protected int determineFreeSpinCount(SpinResult triggerSpin) {
+    protected int determineFreeSpinCount(int scatterCount) {
         return 5;
     }
 }

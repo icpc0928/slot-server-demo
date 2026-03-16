@@ -5,16 +5,30 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * 完整回合結果 — 包含 Base Spin + 所有連消 + Free Spin
+ * 完整回合結果 — 一次 play() 的完整輸出
+ * <p>
+ * 結構：
+ *   RoundResult
+ *   ├── BaseResult (主遊戲)
+ *   │   └── List&lt;CascadeRound&gt;  (初始停輪 + N 次連消)
+ *   ├── List&lt;FreeSpinResult&gt;    (每一轉免費遊戲)
+ *   │   └── List&lt;CascadeRound&gt;  (初始停輪 + N 次連消)
+ *   └── 總計資訊
+ * </p>
  */
 @Data
 @Builder
 public class RoundResult {
     private String gameId;
     private double betAmount;
-    private SpinResult baseSpin;                 // 主遊戲結果
-    private List<SpinResult> cascadeSpins;       // 連消結果
-    private List<SpinResult> freeSpins;          // 免費遊戲結果
+
+    // 主遊戲結果
+    private BaseResult baseResult;
+
+    // 免費遊戲結果（每一轉一個 FreeSpinResult）
+    private List<FreeSpinResult> freeSpinResults;
+
+    // 總計
     private double baseWin;                      // 主遊戲贏分
     private double freeSpinWin;                  // 免費遊戲總贏分
     private double totalWin;                     // 最終總贏分
