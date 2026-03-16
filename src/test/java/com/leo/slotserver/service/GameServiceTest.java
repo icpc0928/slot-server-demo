@@ -6,7 +6,6 @@ import com.leo.slotserver.exception.InsufficientBalanceException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.support.GenericApplicationContext;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,10 +18,7 @@ class GameServiceTest {
 
     @BeforeEach
     void setUp() {
-        // 用空的 ApplicationContext，因為這裡只測 Service 邏輯
-        GenericApplicationContext context = new GenericApplicationContext();
-        context.refresh();
-        SlotEngineFactory factory = new SlotEngineFactory(context);
+        SlotEngineFactory factory = new SlotEngineFactory();
         gameService = new GameService(factory);
     }
 

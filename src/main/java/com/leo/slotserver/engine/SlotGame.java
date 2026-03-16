@@ -1,7 +1,5 @@
 package com.leo.slotserver.engine;
 
-import org.springframework.stereotype.Component;
-
 import java.lang.annotation.*;
 
 /**
@@ -16,11 +14,14 @@ import java.lang.annotation.*;
  * 工廠會自動掃描所有標記此註解的類別並註冊，
  * 新增遊戲不需修改工廠程式碼 — 符合開放封閉原則 (OCP)
  * </p>
+ * <p>
+ * 注意：不加 @Component，因為 Engine 不由 Spring 管理，
+ * 而是由 SlotEngineFactory 透過反射建立（需要傳入 GameConfig）。
+ * </p>
  */
-@Target(ElementType.TYPE)   //type: 只能標在Class, interface (including annotation interface), enum, or record declaration
-@Retention(RetentionPolicy.RUNTIME) //RUNTIME = 程式執行時還在，所以反射才能讀到它
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Component
 public @interface SlotGame {
     /**
      * 遊戲 ID（必須與 YAML 設定檔中的 gameId 一致）
